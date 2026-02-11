@@ -1,5 +1,26 @@
 <div id="map"></div>
 
+<!-- Add the table below the map -->
+<div style="margin-top: 20px; overflow-x: auto;">
+    <h2>Flight Data</h2>
+    <table id="flight-table" style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background-color: #333; color: white;">
+                <th style="padding: 10px; border: 1px solid #ddd;">Callsign</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Country</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Altitude (m)</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Speed (knots)</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Heading (°)</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Latitude</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Longitude</th>
+            </tr>
+        </thead>
+        <tbody id="flight-table-body">
+            <!-- Rows will be populated by JavaScript -->
+        </tbody>
+    </table>
+</div>
+
 <script>
 var map = L.map('map').setView([39.0, -77.0], 10);
 var Stadia_AlidadeSmoothDark = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}', {
@@ -17,33 +38,31 @@ var Stadia_AlidadeSatellite = L.tileLayer('https://tiles.stadiamaps.com/tiles/al
     ext: 'jpg'
 });
 
-
 const baseLayers = {
     "Stadia Dark": Stadia_AlidadeSmoothDark,
     "Stadia Satellite": Stadia_AlidadeSatellite
 }
 
-const overlays = {
-}
+const overlays = {}
 
 var layerControl = L.control
     .layers(baseLayers, overlays)
     .addTo(map);
-    
-
 
 var flightData = <%- flight_data %>;
-console.log(flightData);
+var tableBody = document.getElementById('flight-table-body');
 
 flightData.forEach(function(state) {
     var lon = state[5];
     var lat = state[6];
     var callsign = state[1] ? state[1].trim() : 'Unknown';
+    var country = state[2] || 'Unknown';
     var altitude = state[7];
     var heading = state[10];
     var velocity = state[9];
     
     if (lat && lon) {
+        // Add marker to map
         var icon = L.divIcon({
             html: `
                 <div style="transform: rotate(${heading || 0}deg);">
@@ -65,6 +84,24 @@ flightData.forEach(function(state) {
                 Heading: ${heading ? Math.round(heading) + '°' : 'N/A'}
             `)
             .addTo(map);
+        
+        // Add row to table
+        var row = tableBody.insertRow();
+        row.innerHTML = `
+            <td style="padding: 8px; border: 1px solid #ddd;">${callsign}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${country}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${altitude ? Math.round(altitude) : 'N/A'}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${velocity ? Math.round(velocity * 1.944) : 'N/A'}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${heading ? Math.round(heading) + '°' : 'N/A'}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${lat.toFixed(4)}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${lon.toFixed(4)}</td>
+        `;
+        
+        // Optional: Add click handler to zoom to flight on map
+        row.style.cursor = 'pointer';
+        row.onclick = function() {
+            map.setView([lat, lon], 12);
+        };
     }
 });
 </script>
