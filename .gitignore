@@ -19,6 +19,7 @@ lua_modules/
 
 # Environment/Config
 .env
+.envrc
 config.local.lua
 
 # Database
