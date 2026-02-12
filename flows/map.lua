@@ -1,5 +1,4 @@
 local Flow = require("lapis.flow").Flow
-local http = require("lapis.http")
 local json = require("cjson")
 local OpenSkyService = require("services.opensky")
 

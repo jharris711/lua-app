@@ -9,5 +9,9 @@ config("development", {
     user = "postgres",
     password = "password",
     database = "my_database"
+  },
+  opensky = {
+    client_id = os.getenv("OPENSKY_CLIENT_ID"),
+    client_secret = os.getenv("OPENSKY_CLIENT_SECRET")
   }
 })
